@@ -1,0 +1,89 @@
+User(UserID, Rating, Location, Country)
+
+Item(ItemID, Name, Description)
+
+Classification(Category, ItemID)
+	FK: Classification(ItemID) REFS Item(ItemID)
+
+Auction(AuctionID, ItemID, SellerID, Start, Ends, Buy_Price, First_Bid, Currently, Number_of_Bids)
+	FK: Auction(ItemID) REFS Item(ItemID)
+	FK: Auction(SellerID) REFS User(UserID)
+
+Bid(AuctionID, BidderID, Time, Amount)
+	FK: Bids(AuctionID) REFS User(UserID)
+
+Decomposition:
+The JSON originally give us the following schema:
+Auction(ItemID, Name, Category, Currently, Buy_Price, First_Bid, Number_of_Bids, Bids, Location, Country, Started, Ends, Seller, Description)
+Bid(Bidder, Time, Amount)
+Bidder(UserID, Rating, Location, Country)
+Seller(UserID, Rating)
+
+From intuition, we must have to following dependency:
+ItemID -> Name, Description
+# Here I consider that this description belong to the item, because an item has a description, not belong to an auction. Later if I decide to have a description for the auction, I may need to add a description for the auction.
+
+AuctionID -> ItemID, Currently, Buy_Price, First_Bid, Number_of_Bids, Location, Country, Started, Ends, Seller) 
+# Now AuctionID = ItemID because the json schema is not very well defined, but later, I can make ItemID != AuctionID if the same Item get an auction twice. It is not good to only use just one ItemId to both identity the item and the auction because doesn't comply witha good design
+
+Seller -> Location, Country # Assume a seller only have one address
+Seller -> Rating
+
+Bidder -> Rating, Location, Country # Assume a bidder only have one address
+Bid -> Bidder, Time, Amount
+
+Thus, by decompose this schema to 4th normal form, we take the dependency, and for each dependency, we generate a Relation which only contains this dependency. 
+In addition if A -> B, C, and B -> C, I eliminate the duplication relation, and only have A -> B, B -> C, Thus, I got:
+Item(ItemID, Name, Description)
+Auction(AuctionID, ItemID, Seller, Currently, Buy_Price, First_Bid, Number_of_Bids, Started, Ends)
+Seller(SellerID, Rating, Location, Country)
+Bidder(BidderID, Rating, Location, Country)
+Bid(BidID, BidderID, Time, Amount)
+
+And I combined the seller and bidder because a person can either be a seller or a bidder, and the table contains the same information exception the location and country might be null, thus, I got the following relation so far: 
+
+Item(ItemID, Name, Description)
+Auction(AuctionID, ItemID, Seller, Currently, Buy_Price, First_Bid, Number_of_Bids, Started, Ends)
+User(UserID, Rating, Location, Country)
+Bid(BidID, BidderID, Time, Amount)
+
+The above decomposition made the relations in 3NF and BCNF, since for each dependency A -> B, A is always a candidate key.
+However, Category is not in the relation because there is not dependency between category and item because an item can be in many category and a category have many item, so have must have a relation to include the category information:
+Classification(Category, ItemID) where both Category and ItemID are the primary key
+
+In addition, a bid only belongs to one auction, but an auction have many bids, so that we have BidID -> AuctionID, and I got the following relation:
+Bid(BidID, AuctionID)
+Since I also have
+Bid(BidID, BidderID, Time, Amount)
+I combined the two relation:
+Bid(BidID, AuctionID, BidderID, Time, Amount)
+
+and I think it is not necessary to have BidID, so I delete it and use the combination of AuctionID, BidderID, and Time as the primary key because it is impossible for a person to bid the same auction twice at the same time, and I get
+Bid(AuctionID, BidderID, Time, Amount)
+
+Thus, I got the following relation:
+Classification(Category, ItemID) 
+Item(ItemID, Name, Description)
+Auction(AuctionID, ItemID, SellerID, Currently, Buy_Price, First_Bid, Number_of_Bids, Started, Ends)
+User(UserID, Rating, Location, Country)
+Bid(AuctionID, BidderID, Time, Amount)
+
+with the following dependency:
+ItemID -> Name, Description
+AuctionID -> ItemID, SellerID, Currently, Buy_Price, First_Bid, Number_of_Bids, Started, Ends
+UserID -> Rating
+UserID -> Location, Country # assume this holds
+AuctionID, BidderID, Time -> Amount
+Since the leftsides are always the key, those relation are in 4NF.
+
+Although I try to decompose the relation from the original relation, I actually design my table by using an ER model, which is more obvious
+
+However, if I can not assume the each user only can have one Location, and Country, there will be a multivalue dependency:
+UserID ->> Location, Country since for same UserID and different Address, the Rating is always the same, because UserID -> Rating
+and the key is UserID, Location, Country, so that this violates 4NF
+
+Because I am not sure if we are going to allow the same person have different location and country. Currely, I parse through all the files and check is two people with the same UserID have different address, and none of them have this situation. Thus, I will assume UserID -> Location, Country holds. And if it doesn't holds I will violate the 4th Normal Form for now, because split the table too much will result join the tables very often which is not efficient. And will result in the Bid and Auction to have extra information about the location and country of the user.
+
+if later I discovered that a user can have two different address, I will split the relation to 
+Rating(UserID, Rating)
+Directory(UserID, Location, Country)

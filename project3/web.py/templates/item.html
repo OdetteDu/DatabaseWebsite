@@ -1,0 +1,137 @@
+{% extends "app_base.html" %}
+{% block content %}
+
+{% if items %}
+{% for item in items %}
+<h2>{{ item['Name']|e }}</h2>
+<div>
+  <table width="600" >
+  <tr>
+    <td width="100"><strong>Item ID:</strong></td>
+    <td width="500">{{ item['ItemID']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>Categories: </strong></td>
+    <td>{{ categories|e }}</td>
+  </tr>
+</table>
+</div>
+</br>
+
+<h3>Description</h3>
+<div>{{ item['Description']|e }}</div>
+</br>
+
+<h3>Auction Information</h3>
+<div><table width="300">
+  <tr>
+    <td width="100"><strong>Status:</strong></td>
+    <td width="200">
+    {% if item['notStarted'] == 1 %}
+      <span>Not Started</span>
+    {% elif item['open'] == 1 %}
+      <span style="color:green;">Open</span>
+    {% elif item['closed'] == 1 %}
+      <span style="color:red;">Closed</span>
+    {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Started: </strong></td>
+    <td>{{ item['TimeStart']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>Ends:</strong></td>
+    <td>{{ item['TimeEnd']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>First Bid:</strong></td>
+    <td>${{ item['FirstBid']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>Buy Price: </strong></td>
+    <td>{{ item['BuyPrice']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>Last Bid: </strong></td>
+    <td>${{ item['Currently']|e }}</td>
+  </tr>
+  {% if item['closed'] == 1 %}
+  <tr>
+    <td><strong>Winner: </strong></td>
+    <td style="color:red;">{{ winner|e}}</td>
+  </tr>
+  {% endif %}
+</table>
+</div>
+</br>
+
+<h3>Seller Information</h3>
+<div>
+<table width="300" >
+  <tr>
+    <td width="100"><strong>Seller ID:</strong></td>
+    <td width="200">{{ item['SellerID']|e }}</td>
+  </tr>
+  <tr>
+    <td><strong>Rating: </strong></td>
+    <td>{{ item['Rating']|e }}</td>
+  </tr>
+</table>
+</div>
+</br>
+
+<h3>Bid History</h3>
+{% if bids %}
+<table width="450" >
+  <tr>
+    <td width="150"><strong>User ID</strong></td>
+    <td width="200"><strong>Time</strong></td>
+    <td width="100"><strong>Amount</strong></td>
+  </tr>
+  {% for bid in bids %}
+  <tr>
+    <td>{{ bid['BidderID']|e }}</td>
+    <td>{{ bid['Time']|e }}</td>
+    <td>${{ bid['Amount']|e }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div>No bids</div>
+{% endif %}
+
+</br>
+
+{% if message is defined %}
+  <div class="alert alert-warning">{{ message }}</div>
+{% endif %}
+
+{% if item['open'] == 1 %}
+<h3>Make A Bid</h3>
+<div>
+	<form method="POST" action="item" style="max-width:400px; width:100%">
+  <div class="alert alert-info">All fields must be input</div>
+  <div class="form-group">
+    <label for="itemID">Item ID</label>
+    <input type="text" class="form-control" id="itemID" name="itemID" value={{ item['ItemID']|e }} />
+  </div>
+  <div class="form-group">
+    <label for="userID">User ID</label>
+    <input type="text" name="userID" class="form-control" id="userID" />
+  </div>
+  <div class="form-group">
+    <label for="price">Price</label>
+    <input type="number" name="price" class="form-control" id="price" min="0" step="0.01" />
+  </div>
+  <div class="form-group"><input type="submit" value="Add bid" class="btn btn-primary"/></div>
+</form>
+</div>
+{% endif %}
+{% endfor %}
+{% else %}
+<br><br>
+<div class="alert alert-warning">No Such Item</div>
+{% endif %}
+{% endblock %}
+

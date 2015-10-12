@@ -1,0 +1,54 @@
+1. Make UserID a primary key
+	create.sql
+
+2. Make SellerID in Auction table and BidderID in Bid table references UserID in the User table. Foreign key constraint. Referential Integrity
+	create.sql
+
+3. Make ItemID, AuctionID a primary key in the item and auction table
+	create.sql
+
+4. Make AuctionID in Bid table references AuctionID in Auction table, and make ItemID in Auction table references ItemID in Item table. Foreign key constraint. Referential Integrity
+	create.sql
+
+5. Make ItemID in Classification table not null. And make ItemID in Classification table references Item table. Foreign key constraint. Referential Integrity
+	create.sql
+
+6. Make both the ItemID and the Category in Classification table the primary key of this table
+	create.sql
+
+7. Put a check by the end of the parenthesis of the Auction table's declaration to check startTime < endTime
+	create.sql
+
+8. Create a trigger to update the current price after insert a bid, since the amount has to be the highest amount because we have a trigger to enforce this before insert a bid, I just update the current price to the new amount 
+	trigger1_add.sql
+	trigger1_drop.sql
+
+9. Create a trigger to make sure that the auctionID and the BidderID and the SellerID doesn't match
+	trigger2_add.sql
+	trigger2_drop.sql
+
+10. Make AuctionID and Time the primary key of the Bid table because AuctionID and Time can uniquely determine the Bidder and the amount
+	create.sql
+
+11. Create a trigger to check if the bid time is after the auction's start time and before the auction's end time
+	trigger3_add.sql
+	trigger3_drop.sql
+
+12. Make the combination of AuctionID, BidderID and Amount unique, however, this is implied in 14 because 14 enforced the later bid amount higher than the previous amount so that two bid with the same amount is impossible to happen
+	create.sql
+
+13. Create a trigger to update the number_of_bids after a successful insert of bid
+	trigger4_add.sql
+	trigger4_drop.sql
+
+14. Create a trigger to check if the new amount is higher than all the previous bid amount of the same auction
+	trigger5_add.sql
+	trigger5_drop.sql
+
+15. User foreign key references to enforce the match. Because there is only one tuple in the currentTime table, when the bid's Time references the currentTime, it has to match the currentTime
+	create.sql
+
+16. User a trigger to check if the new time is greater than the old time
+	trigger6_add.sql
+	trigger6_drop.sql
+

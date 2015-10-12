@@ -1,0 +1,81 @@
+{% extends "app_base.html" %}
+{% block content %}
+<h3> Search </h3> 
+
+<form method="POST" action="search" role="form" style="max-width:400px; width:100%">
+	{% if message is defined %}
+	<div class="alert alert-warning" role="alert">{{ message }}</div>
+	{% endif %}
+	<div class="alert alert-info">Anything not input will not be taken into account</div>
+	<div class="form-group">
+	  <label for="itemID">Item ID</label>
+	  <input type="text" name="itemID" class="form-control" id="itemID"  />
+	</div>
+	<div class="form-group">
+	  <label for="category">Category</label>
+	  <input type="text" name="category" class="form-control" id="category" />
+	</div>
+	<div class="form-group">
+	  <label for="description">Description</label>
+	  <input type="text" name="description" class="form-control" id="description" />
+	</div>
+	<div class="form-group">
+	  <label for="minPrice">Min Price</label>
+	  <input type="text" name="minPrice" class="form-control" id="minPrice" />
+	</div>
+	<div class="form-group">
+	  <label for="maxPrice">Max Price</label>
+	  <input type="text" name="maxPrice" class="form-control" id="maxPrice" />
+	</div>
+	<div class="form-group">
+		<label for="status">Status &nbsp;&nbsp;</label>
+		<div class="radio-inline"><label><input type="radio" name="status" value="open">Open</label></div>
+		<div class="radio-inline"><label><input type="radio" name="status" value="close">Close</label></div>
+		<div class="radio-inline"><label><input type="radio" name="status" value="notStarted">Not Started</label></div>
+		<div class="radio-inline"><label><input type="radio" name="status" value="all" checked>All</label></div>
+	</div>
+	<div><input type="submit" value="Start Searching!" class="btn btn-primary" /></div>
+</form>
+
+<br>
+<h3>Result</h3>
+
+{% if search_result %}
+<table width="1040" >
+  <tr>
+    <td width="400"><strong>Name</strong></td>
+    <td width="100"><strong>Seller</strong></td>
+    <td width="150"><strong>Start</strong></td>
+    <td width="150"><strong>End</strong></td>
+    <td width="80"><strong>Current Price</strong></td>
+    <td width="80"><strong>Buy Price</strong></td>
+    <td width="80"><strong>Status</strong></td>
+  </tr>
+  {% for result in search_result %}
+  <tr>
+    <td>
+    	{% set linkString = 'item?itemID=' %}
+    	<a href={{ linkString ~ result['ItemID']|e }}>{{ result['Name']|e }}</a>
+    </td>
+    <td style="text-overflow:ellipsis;">{{ result['SellerID']|e }}</td>
+    <td>{{ result['TimeStart']|e }}</td>
+    <td>{{ result['TimeEnd']|e }}</td>
+    <td>{{ result['Currently']|e }}</td>
+    <td>{{ result['BuyPrice']|e }}</td>
+    <td>
+    	{% if result['notStarted'] == 1 %}
+			<span>Not Started</span>
+		{% elif result['open'] == 1 %}
+			<span style="color:green;">Open</span>
+		{% elif result['closed'] == 1 %}
+			<span style="color:red;">Closed</span>
+		{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div>No results</div>
+{% endif %}
+
+{% endblock %}

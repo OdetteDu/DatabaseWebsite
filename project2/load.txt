@@ -1,0 +1,14 @@
+.separator <>
+.import userTable.dat AuctionUser
+.import itemTable.dat Item
+.import classificationTable.dat Classification
+.import auctionTable.dat Auction
+.import bidTable.dat Bid
+
+update AuctionUser
+set Location = null
+where Location = 'NULL';
+
+update AuctionUser
+set Country = null
+where Country = 'NULL';
